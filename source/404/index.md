@@ -1,0 +1,17 @@
+---
+title: 404
+comments: false
+date: 2019-12-16 14:21:19
+permalink: /404
+---
+
+<!DOCTYPE html>
+<html>
+    <head>
+         <meta charset="UTF-8" />
+         <title>404</title>                                                                                                                                        
+    </head>
+    <body>
+         <script type="text/javascript" src="//qzonestyle.gtimg.cn/qzone/hybrid/app/404/search_children.js" homePageName="返回首页" homePageUrl="https://yanzixian.github.io/"></script>
+	</body>
+</html>
