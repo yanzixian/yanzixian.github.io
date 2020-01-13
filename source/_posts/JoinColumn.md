@@ -21,7 +21,11 @@ tags: jpa
 
 ##### `@OneToOne`
 
+###### 单向
+
 `@OneToOne` 用来表示类似于以上员工与地址之间的一对一的关系，在员工表中会有一个指向地址表主键的字段`address_id`，所以主控方（指能够主动改变关联关系的一方）一定是员工，因为，只要改变员工表的`address_id`就改变了员工与地址之间的关联关系，所以`@JoinColumn`要写在员工实体类`Employee`上，自然而然地，地址就是被控方了。
+
+
 
 ```java
 
@@ -40,6 +44,26 @@ private Address address;
 @PrimaryKeyJoinColumn(name = "employee_id", referencedColumnName = "address_id")
 
 ```
+
+主控方即关系维护端，被控方为关系被维护端，外键位于主控方。关系维护端需要负责与被维护端关系的建立，同时也要负责与被维护端关系的解除，而被维护段对这些一无所知。
+
+在此例中，若存在员工Employee_A，对应的地址为Address_A，此时若有另一名员工Employee_B，对应的地址也为Address_A，程序是不会报错的，因为被维护端Address_A无法获知自己对应了几名员工，而员工却只知道自己只对应了一个地址。
+
+同时，对于一组单向一对一关系，`Employee_C----->Address_C`，只删除Employee表中Employee_C这一条记录而保留Address表中的Address_C记录，程序也不会报错，原因同上；但若反过来删除Address_C而保留Employee_C，程序报错，因为Employ_C中仍然保留着指向Address_C的外键。
+
+###### 双向
+
+双向`@OneToOne`是在单向的基础上，使得被维护端也可以知道与自己有关的维护端的信息，只需在被维护端加上一个维护端的字段，并使用`mappedBy`属性。
+
+此例中，在Address表（被维护端）中加入Employee（维护端）字段
+
+```java
+//mappedBy表明了关系被维护端，这样就可以通过address得到对应的employee
+@OneToOne(mappedBy="address")
+private Employee employee;
+```
+
+
 
 ##### `@OneToMany`
 
