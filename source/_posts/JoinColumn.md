@@ -21,7 +21,7 @@ tags: jpa
 
 ##### `@OneToOne`
 
-@OneToOne 用来表示类似于以上员工与地址之间的一对一的关系，在员工表中会有一个指向地址表主键的字段address_id，所以主控方（指能够主动改变关联关系的一方）一定是员工，因为，只要改变员工表的address_id就改变了员工与地址之间的关联关系，所以@JoinColumn要写在员工实体类Employee上，自然而然地，地址就是被控方了。
+`@OneToOne` 用来表示类似于以上员工与地址之间的一对一的关系，在员工表中会有一个指向地址表主键的字段`address_id`，所以主控方（指能够主动改变关联关系的一方）一定是员工，因为，只要改变员工表的`address_id`就改变了员工与地址之间的关联关系，所以`@JoinColumn`要写在员工实体类`Employee`上，自然而然地，地址就是被控方了。
 
 ```java
 
@@ -30,9 +30,9 @@ tags: jpa
 private Address address;
 ```
 
-我们也可以不写@JoinColumn，Hibernate会自动在员工表生成关联字段，字段默认的命名规则：被控方类名_被控方主键，如：address_id。
+我们也可以不写`@JoinColumn`，Hibernate会自动在员工表生成关联字段，字段默认的命名规则：被控方类名_被控方主键，如：`address_id`。
 
-如果两张表是以主键关联的，比如员工表主键是employee_id，地址表主键是address_id，可以使用如下注解： 
+如果两张表是以主键关联的，比如员工表主键是`employee_id`，地址表主键是`address_id`，可以使用如下注解： 
 
 ```java
 
@@ -43,7 +43,7 @@ private Address address;
 
 ##### `@OneToMany`
 
-在分析员工与部门之间的关系时，一个员工只能属于一个部门，但是一个部门可以包含有多个员工，如果我们站在部门的角度来看，部门与员工之间就是一对多的关系，在部门实体类 Department 上添加如下注解： 
+在分析员工与部门之间的关系时，一个员工只能属于一个部门，但是一个部门可以包含有多个员工，如果我们站在部门的角度来看，部门与员工之间就是一对多的关系，在部门实体类 `Department` 上添加如下注解： 
 
 ```java
 @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -51,9 +51,9 @@ private Address address;
 private List<Employee> employees;
 ```
 
-我们也可以不写@JoinColumn，Hibernate会自动生成一张中间表来对员工和部门进行绑定，表名默认的命名规则：一的表名_一实体类中关联多的属性名，例如，部门表名为 tbl_department ，部门实体中关联的员工集合属性名为 employees ，则生成的中间表名为：tbl_department_employees。
+我们也可以不写`@JoinColumn`，`Hibernate`会自动生成一张中间表来对员工和部门进行绑定，表名默认的命名规则：一的表名_一实体类中关联多的属性名，例如，部门表名为 `tbl_department` ，部门实体中关联的员工集合属性名为 `employees` ，则生成的中间表名为：`tbl_department_employees`。
 
-通常并不推荐让Hibernate自动去自动生成中间表，而是使用@JoinTable注解来指定中间表：  
+通常并不推荐让`Hibernate`自动去自动生成中间表，而是使用`@JoinTable`注解来指定中间表：  
 
 ```java
 @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -68,7 +68,7 @@ private List<Employee> employees;
 
 ##### `@ManyToOne`
 
-如果我们站在员工的角度来看员工与部门之间的关系时，二者之间就变成了多对一的关系，在员工实体类 Employee 上添加如下注解： 
+如果我们站在员工的角度来看员工与部门之间的关系时，二者之间就变成了多对一的关系，在员工实体类 `Employee` 上添加如下注解： 
 
 ```java
 
@@ -79,7 +79,7 @@ private Department department;
 
 `@ManyToMany`
 
-类似员工与角色之间的关系，一个员工可以拥有多个角色，一个角色也可以属于多个员工，员工与角色之间就是多对多的关系。通常这种多对多关系都是通过创建中间表来进行关联处理，并使用@JoinTable注解来指定。
+类似员工与角色之间的关系，一个员工可以拥有多个角色，一个角色也可以属于多个员工，员工与角色之间就是多对多的关系。通常这种多对多关系都是通过创建中间表来进行关联处理，并使用`@JoinTable`注解来指定。
 
 一个员工可以拥有多个角色，在员工实体类中添加如下注解：
 
