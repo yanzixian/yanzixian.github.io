@@ -49,7 +49,7 @@ private Address address;
 
 在此例中，若存在员工Employee_A，对应的地址为Address_A，此时若有另一名员工Employee_B，对应的地址也为Address_A，程序是不会报错的，因为被维护端Address_A无法获知自己对应了几名员工，而员工却只知道自己只对应了一个地址。
 
-同时，对于一组单向一对一关系，`Employee_C----->Address_C`，只删除Employee表中Employee_C这一条记录而保留Address表中的Address_C记录，程序也不会报错，原因同上；但若反过来删除Address_C而保留Employee_C，程序报错，因为Employ_C中仍然保留着指向Address_C的外键。
+同时，对于一组单向一对一关系，`Employee_C-->Address_C`，只删除Employee表中Employee_C这一条记录而保留Address表中的Address_C记录，程序也不会报错，原因同上；但若反过来删除Address_C而保留Employee_C，程序报错，因为Employ_C中仍然保留着指向Address_C的外键。
 
 ###### 双向
 
@@ -63,7 +63,13 @@ private Address address;
 private Employee employee;
 ```
 
+双向 `@OneToOne`中，上述示例中若有多个员工（Employee)对应同一个地址(Address)，则会报错
 
+**总结：**
+
+- 无论是单向还是双向，关系的保存都需要关系维护端进行操作，即上述示例中若通过保存Address来保存Employee是不会成功的，Employee的外键字段不会有值
+- 所谓一对一映射，其实是关系维护端的映射关系，关系维护端只能映射一个被维护端，被维护端和几个维护端关联不能获知（单向）
+- 关系维护端可以主动修改关系，而被维护端只能被动接受
 
 ##### `@OneToMany`
 
@@ -90,6 +96,38 @@ private List<Employee> employees;
 private List<Employee> employees;
 ```
 
+###### 单向
+
+单向 `@OneToMany`，在上述示例中表示一个部门(Department)知道拥有几个员工(Employee)，但员工却不知道自己属于哪个部门
+
+数据库表方面是在`Many`，即多的一方生成外键字段
+
+###### 双向
+
+双向需要使用`mappedBy`属性，并与`@ManyToOne`配合使用
+
+在`Many`的一方使用`@ManyToOne`注解，是关系的**维护端**，是**从表**；负责外键字段的更新。在本例中即Employee，在Employee中添加外键字段，表中也生成相应的外键字段
+
+```java
+@ManyToOne
+@JoinColumn(name="department_id")
+private Department department;
+```
+
+在`One`的一方使用`@OneToMany`注解，是关系的**被维护端**，是**主表**；在本例中即Department，在Department中使用注解`@OneToMany`和`mappedBy`属性
+
+```java
+//只要出现mappedBy属性，即为关系被维护端
+@OneToMany(mappedBy="department"，cascadeType=CascadeType.all,fetch=FetchType.LAZY)
+private Set<Employee> employees;
+```
+
+**注意：**
+
+- 在`CascadeType`中的类型分别对应`EnityManager`（实体管理器）中对应的方法
+
+- 在`xxxxToxxxx`中， 如果To后面是Many，加载方式为延迟加载， 如果To后面是One,加载方式为立即加载 
+
 ##### `@ManyToOne`
 
 如果我们站在员工的角度来看员工与部门之间的关系时，二者之间就变成了多对一的关系，在员工实体类 `Employee` 上添加如下注解： 
@@ -101,7 +139,7 @@ private List<Employee> employees;
 private Department department;
 ```
 
-`@ManyToMany`
+##### `@ManyToMany`
 
 类似员工与角色之间的关系，一个员工可以拥有多个角色，一个角色也可以属于多个员工，员工与角色之间就是多对多的关系。通常这种多对多关系都是通过创建中间表来进行关联处理，并使用`@JoinTable`注解来指定。
 
