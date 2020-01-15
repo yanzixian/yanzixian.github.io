@@ -5,9 +5,13 @@ categories: Spring
 tags: jpa
 ---
 
+
+
 本文在原文的基础上，加了自己的理解和相关补充，方便自己学习和记忆，查看原文点击[此处](https://blog.csdn.net/pengjunlee/article/details/79972059)，感谢原文大佬
 
-#### `@JoinColumn`
+[toc]
+
+### `@JoinColumn`
 
 作用：用来指定与所操作实体或实体集合相关联的数据库表中的列字段
 
@@ -100,6 +104,8 @@ private List<Employee> employees;
 
 单向 `@OneToMany`，在上述示例中表示一个部门(Department)知道拥有几个员工(Employee)，但员工却不知道自己属于哪个部门
 
+在`One`的一方添加`@OneToMany`、`@JoinColumn`注解，`Many`的一方什么都不做
+
 数据库表方面是在`Many`，即多的一方生成外键字段
 
 ###### 双向
@@ -114,7 +120,7 @@ private List<Employee> employees;
 private Department department;
 ```
 
-在`One`的一方使用`@OneToMany`注解，是关系的**被维护端**，是**主表**；在本例中即Department，在Department中使用注解`@OneToMany`和`mappedBy`属性
+在`One`的一方使用`@OneToMany`注解，是关系的**被维护端**，是**主表**；没有权利更新外键记录，在本例中即Department，在Department中使用注解`@OneToMany`和`mappedBy`属性
 
 ```java
 //只要出现mappedBy属性，即为关系被维护端
@@ -139,9 +145,25 @@ private Set<Employee> employees;
 private Department department;
 ```
 
+###### 单向
+
+多个员工（Employee）属于同一个部门
+
+在`Many`的一方，即`Employee`中添加`@ManyToOne`、`@JoinColumn`注解，`One`的一方，即`Department`中什么都不做
+
+数据库中是在`Many`一方即`Employee`中生成外键字段
+
+###### 双向
+
+与`@OneToMany`配合使用，具体见`@OneToMany`双向
+
 ##### `@ManyToMany`
 
 类似员工与角色之间的关系，一个员工可以拥有多个角色，一个角色也可以属于多个员工，员工与角色之间就是多对多的关系。通常这种多对多关系都是通过创建中间表来进行关联处理，并使用`@JoinTable`注解来指定。
+
+###### 单向
+
+单向`@ManyToMany`中，只需在其中一方添加`@ManyToMany`、`@JoinTable`即可，具体添加在哪一个取决于具体的需求，若需要通过员工获取其对应的多个角色，而不能通过角色获取拥有该角色的员工，只需在员工实体类中添加注解，角色实体类中什么都不做
 
 一个员工可以拥有多个角色，在员工实体类中添加如下注解：
 
@@ -151,8 +173,9 @@ private Department department;
 @JoinTable(name = "tbl_employee_role", joinColumns = { @JoinColumn(name = "employee_id") }, inverseJoinColumns = {
 @JoinColumn(name = "role_id") })
 private List<Role> roles;
-
 ```
+
+若需要通过角色获取拥有该角色的多个员工，而不能通过员工获取该员工拥有的多个角色，需要在角色实体类中添加注解，员工实体类中什么都不做
 
 一个角色可以属于多个员工，在角色实体类中添加如下注解：
 
@@ -163,7 +186,53 @@ private List<Role> roles;
 private List<Employee> employees;
 ```
 
-#### 实体类代码：
+###### 双向
+
+双向`@ManyToMany`需要使用到`mappedBy`属性,`mappedBy`属性添加的位置有两种方式
+
+如：
+
+员工实体类中添加如下注解：
+
+```java
+@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+@JoinTable(name = "tbl_employee_role", joinColumns = { @JoinColumn(name = "employee_id") }, inverseJoinColumns = {
+@JoinColumn(name = "role_id") })
+private List<Role> roles;
+```
+
+角色实体类中添加如下注解：
+
+```java
+//mappedBy属性的值即为员工实体类中定义的private List<Role> roles;
+@ManyToMany(mappedBy="roles")
+private List<Employee> employees;
+```
+
+或者：
+
+员工实体类中添加如下注解：
+
+```java
+//mappedBy属性的值即为员工实体类中定义的private List<Employee> employees;
+@ManyToMany(mappedBy="empolyees")
+private List<Role> roles;
+```
+
+角色实体类中添加如下注解：
+
+```java
+@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+@JoinTable(name = "tbl_employee_role", joinColumns = { @JoinColumn(name = "role_id") }, inverseJoinColumns = {
+@JoinColumn(name = "employee_id") })
+private List<Employee> employees;
+```
+
+
+
+### 实体类代码：
+
+#### 单向
 
 ##### 员工实体类
 
@@ -200,7 +269,7 @@ public class Employee {
 
 ```
 
-##### 地址实体类：
+##### 地址实体类
 
 ```java
 @Entity
@@ -275,3 +344,114 @@ public class Role {
 
 ```
 
+#### 双向
+
+##### 员工实体类
+
+```java
+@Entity
+@Table(name = "tbl_employee") // 指定关联的数据库的表名
+public class Employee {
+ 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id; // 主键ID
+ 
+	private String name; // 姓名
+ 
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate birthday; // 生日
+ 
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "address_id")
+	// @PrimaryKeyJoinColumn(name = "employee_id", referencedColumnName = "address_id")
+	private Address address; // 地址
+ 
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "department_id")
+	private Department department; // 部门
+ 
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinTable(name = "tbl_employee_role", joinColumns = { @JoinColumn(name = "employee_id") }, inverseJoinColumns = {
+			@JoinColumn(name = "role_id") })
+	private List<Role> roles; // 角色
+ 
+	// 此处省略get和set方法
+}
+
+```
+
+##### 地址实体类
+
+```java
+@Entity
+@Table(name = "tbl_address")
+public class Address {
+ 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id; // 主键ID
+ 
+	private String province; // 省
+ 
+	private String city; // 市
+ 
+	private String district; // 区
+ 
+	private String address; // 详细地址
+    
+    //双向一对一，mappedBy的值即为员工实体类定义的private Address address; // 地址
+    @OneToOne(mappedBy="address")
+    private Employee employee;
+ 
+	// 此处省略get和set方法
+ 
+}
+
+```
+
+##### 部门实体类
+
+```java
+@Entity
+@Table(name = "tbl_department")
+public class Department {
+ 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id; // 主键ID
+ 
+	private String name; // 部门名称
+ 
+    //双向 mappedBy的值即为员工实体类中定义的private Department department; // 部门
+	@OneToMany(mappedBy="department")
+	private List<Employee> employees; // 部门员工
+ 
+	// 此处省略get和set方法
+}
+```
+
+##### 角色实体类
+
+```java
+@Entity
+@Table(name = "tbl_role")
+public class Role {
+ 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id; // 主键ID
+ 
+	private String name; // 角色名称
+ 
+    //双向@ManyToMany，mappedBy的值即为员工实体类中的private List<Role> roles; // 角色
+	@ManyToMany(mappedBy="roles")
+	private List<Employee> employees; // 拥有角色的员工
+ 
+	// 此处省略get和set方法
+ 
+}
+
+```
+
+#### 
