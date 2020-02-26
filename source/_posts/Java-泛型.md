@@ -1,6 +1,6 @@
 ---
 title: Java 泛型
-categories: Java
+categories: java
 tags: generic
 ---
 
