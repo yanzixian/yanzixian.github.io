@@ -12,7 +12,7 @@ tags:
 ---
 
 #### Chrome浏览器
-![](https://cdn.jsdelivr.net/gh/yanzixian/figureBed/img2020chrome.jpg)
+![chrome](https://cdn.jsdelivr.net/gh/yanzixian/figureBed/img2020chrome.jpg)
 
 
 
@@ -22,7 +22,7 @@ tags:
 
 #### Typora
 
-![](https://cdn.jsdelivr.net/gh/yanzixian/figureBed/img2020img2020typora-icon.png)
+![Typora](https://cdn.jsdelivr.net/gh/yanzixian/figureBed/img2020img2020typora-icon.png)
 
 MarkDown文档书写工具，没错，这篇文档就是用它写的
 
@@ -84,7 +84,7 @@ Chrome有Free Download Manager extension插件，可以在Chrome应用商店中�
 
 文件搜索工具
 
-![](C:%5CUsers%5C24583%5CDocuments%5Cblog_hexo%5Csource%5C_posts%5CPC%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7%E8%AE%B0%E5%BD%95.assets%5Cimg2020everything-6863__everything_icon_converted-1583304879639.png)
+![everything](https://cdn.jsdelivr.net/gh/yanzixian/figureBed/img2020everything-6863__everything_icon_converted.png)
 
 文件搜索神器，体积小，速度快，支持正则语法，不过一般都是搜文件名
 
