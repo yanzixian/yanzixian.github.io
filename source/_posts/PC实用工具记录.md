@@ -46,7 +46,7 @@ picGo支持上述所有图床（微博图床不再支持），用于将本地图
 
 自己现在用的是GitHub图床，唉，毕竟免费，就是图片加载速度慢，又是会加载不出来，可以使用jsDeliver提供的CDN服务（没错，又是免费:smirk:），提高加载速度
 
-Ditto:
+#### Ditto
 
 ![Ditto Icon](https://cdn.jsdelivr.net/gh/yanzixian/figureBed/img2020img2020icon.png)
 
@@ -101,6 +101,30 @@ Chrome有Free Download Manager extension插件，可以在Chrome应用商店中�
 ![img](https://cdn.jsdelivr.net/gh/yanzixian/figureBed/img2020e18d20c94006dfe0-0381536966d1161a-3a665d27faa0ebb89387bb25481a888a.jpg)
 
 目前就到这儿了                                                                                  2020/3/4
+
+---
+
+#### Snipaste
+
+微软提供的一个截图工具，压缩包，免安装，功能强大，截图+贴图
+
+截图功能就不说了，快捷键`F1`
+
+贴图功能，快捷键`F3`，可以把剪贴板的内容转化为图片置顶显示
+
+- 剪贴板中的是图片，则贴出图像
+- 剪贴板中的是文字，将文字转化为图像贴出
+- 剪贴板中的是文件路径
+  - 路径指示的文件为图片，则贴出图片；贴出图片后再次作贴图操作，则会贴出路径文本
+  - 不是图片，则将路径按文本贴出
+
+还有大量的高级操作，用不着，也没记住
+
+![](https://gitee.com/yanzixian/picBed/raw/master/img202003/嘿嘿.png)
+
+系统自带的截图工具也不错，但没有贴图功能，也没有历史截图的记录，关键是没怎么用过
+
+2020/3/9
 
 ---
 
