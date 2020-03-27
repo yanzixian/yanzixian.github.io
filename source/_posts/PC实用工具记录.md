@@ -128,3 +128,25 @@ Chrome有Free Download Manager extension插件，可以在Chrome应用商店中�
 
 ---
 
+#### geek uninstaller
+
+![](https://gitee.com/yanzixian/picBed/raw/master/img202003/20200327221842.png)
+
+软件卸载程序
+
+体积小（6M），免安装（就是一个.exe可执行文件），免费（也有收费版，功能多一点）；
+
+卸载软件的同时，可以快速完全的清理相关的文件和注册表垃圾，卸载得十分干净
+
+#### 7-zip
+
+![](https://gitee.com/yanzixian/picBed/raw/master/img202003/20200327222511.png)
+
+开源压缩、解压缩软件
+
+体积小（1M），免安装（exe），支持多种格式（zip，rar，7z）
+
+2020/3/27 更新
+
+---
+
