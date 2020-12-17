@@ -4,9 +4,9 @@
 
 ![](https://gitee.com/yanzixian/picBed/raw/master/img202003/感谢大佬.png)
 
-### JAVA常量池
-
-学习常量池前，需要对于Java虚拟机机`JVM`有一个大概的了解
+### JAVA常量池  
+---
+ 了解常量池前，需要对于Java虚拟机`JVM`有一个大概的了解
 
 #### JVM内存分布
 

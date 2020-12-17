@@ -1,8 +1,8 @@
 ---
 title: Arrays.asList()使用中遇到的问题
 date: 2020-04-17 14:08:37
-categories:java
-tags:
+categories: java
+
 ---
 
 #### 概述
