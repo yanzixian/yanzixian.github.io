@@ -97,8 +97,12 @@ theme: hexo-theme-next
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-    type: git
-    repository: git@github.com:yanzixian/yanzixian.github.io.git
-    branch: master
+    - type: git
+      repository: git@gitee.com:yanzixian/yanzixian.git
+      branch: master
+    - type: git
+      repository: git@github.com:yanzixian/yanzixian.github.io.git
+      branch: master
+
 stylus:
     compress: true
