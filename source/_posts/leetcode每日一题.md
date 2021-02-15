@@ -1,3 +1,7 @@
+[toc]
+
+
+
 #### 146、LRU缓存机制
 
 ##### 题目描述
@@ -1173,5 +1177,207 @@ class Solution {
         return answer;
     }
 }
+```
+
+#### 765、情侣牵手
+
+##### 题目描述
+
+N 对情侣坐在连续排列的 2N 个座位上，想要牵到对方的手。 计算最少交换座位的次数，以便每对情侣可以并肩坐在一起。 一次交换可选择任意两人，让他们站起来交换座位。
+
+人和座位用 0 到 2N-1 的整数表示，情侣们按顺序编号，第一对是 (0, 1)，第二对是 (2, 3)，以此类推，最后一对是 (2N-2, 2N-1)。
+
+这些情侣的初始座位  row[i] 是由最初始坐在第 i 个座位上的人决定的。
+
+```
+示例 1:
+
+输入: row = [0, 2, 1, 3]
+输出: 1
+解释: 我们只需要交换row[1]和row[2]的位置即可。
+```
+
+##### 思路
+
+这个问题本质上是要将N对情侣为不同的集合，分类依据是他们之间错误的坐法；
+
+比如第`i`对情侣中的错误地与第`j`对坐在了一起，而第`j`对的情侣错误地与第`k`对坐在一起.........；最后，会有第`m`对情侣与开始的第`i`对错误地坐在了一起，形成一个`i->j->k->...->m->i`的一个闭环，闭环内部n个人在一个集合中，可以通过`n-1`次交换，使正确的情侣牵手；
+
+##### 方法一、并查集
+
+使用并查集将N对情侣进行分类：
+
+```c++
+class Solution_765_1 {
+public:
+    //查找父节点
+    int getf(vector<int> &f, int x) {
+        if (f[x] == x) {
+            return x;
+        }
+        int newf = getf(f, f[x]);
+        f[x] = newf;
+        return newf;
+    }
+    //并查集合并
+    void add(vector<int>& f,int x,int y){
+        int fx=getf(f,x);
+        int fy=getf(f,y);
+        f[fx]=fy;
+    }
+    
+    int minSwapsCouples(vector<int> &row) {
+        int n=row.size();
+        int tot=n/2;
+        //并查集初始化父节点
+        vector<int>father (tot,0);
+        for(int i=0;i<tot;i++)
+            father[i]=i;
+		//将有关系的情侣添加到同一个集合中
+        for(int i=0;i<n;i+=2){
+            int l=row[i]/2;
+            int r=row[i+1]/2;
+            add(father,l,r);
+        }
+
+        unordered_map<int,int> m;
+        for(int i=0;i<tot;i++){
+            int fx=getf(father,i);
+            m[fx]++;
+        }
+
+        int ret=0;
+        for(const auto& [fa,sz] :m){
+            ret+=sz-1;
+        }
+        return ret;
+    }
+};
+```
+
+##### 方法二、广度优先搜索
+
+将N对情侣当成N个节点，求不同的集合相当于求图中的连通分量；使用广度优先搜索求连通分量；
+
+```c++
+class Solution_765 {
+public:
+    int minSwapsCouples(vector<int> &row) {
+        int n = row.size();
+        int tot = n / 2;
+        //创建一个二维数组，表示Ｎ个节点的图
+        vector<vector<int>> graph(tot);
+        //遍历数组，构建图
+        for (int i = 0; i < n; i += 2) {
+            int l = row[i] / 2;
+            int r = row[i + 1] / 2;
+
+            if (l != r) {
+                graph[r].push_back(l);
+                graph[l].push_back(r);
+            }
+        }
+		
+        vector<int> visited(tot, 0);
+        int ret = 0;
+
+        //广度优先算法求连通分量
+        for (int i = 0; i < tot; i++) {
+            if (visited[i] == 0) {
+                queue<int> q;
+                visited[i] = 1;
+                q.push(i);
+
+                int cnt = 0;
+
+                while (!q.empty()) {
+                    int x = q.front();
+                    q.pop();
+                    cnt += 1;
+
+                    for (int y:graph[x]) {
+
+                        if (visited[y] == 0) {
+                            visited[y] = 1;
+                            q.push(y);
+                        }
+                    }
+                }
+                ret += cnt - 1;
+            }
+        }
+        return ret;
+    }
+};
+
+```
+
+#### 465、最大连续1的个数
+
+##### 题目
+
+给定一个二进制数组， 计算其中最大连续1的个数。
+
+示例 1:
+
+输入: [1,1,0,1,1,1]
+输出: 3
+解释: 开头的两位和最后的三位都是连续1，所以最大连续1的个数是 3.
+
+注意：
+
+    输入的数组只包含 0 和1。
+    输入数组的长度是正整数，且不超过 10,000。
+
+##### 方法一
+
+遇到1时计数+1，遇到0时重置计数，记录最大计数；由于最长连续串可能出现在最后，因此，循环结束后需要在比较一次；
+
+```c++
+class Solution_485{
+public:
+   int findMaxConsecutiveOnes(vector<int>& nums) {
+        int maxCount = 0, count = 0;
+        int n = nums.size();
+        for (int i = 0; i < n; i++) {
+            if (nums[i] == 1) {
+                count++;
+            } else {
+                maxCount = max(maxCount, count);
+                count = 0;
+            }
+        }
+        maxCount = max(maxCount, count);
+        return maxCount;
+    }
+};
+```
+
+##### 方法二、双指针
+
+定义两个指针，分别指向连续`1`串的开始和结束
+
+```c++
+class Solution_485{
+public:
+    int findMaxConsecutiveOnes(vector<int>& nums) {
+        int i=0,j=0;
+        int len=nums.size();
+        int maxCount=0;
+
+        while(i<len){
+
+            if(nums[i]==1){
+                ++i;
+            }else{
+                maxCount=max(maxCount,i-j);
+                j=++i;
+
+            }
+        }
+        maxCount=max(maxCount,i-j);
+        return maxCount;
+    }
+};
 ```
 
