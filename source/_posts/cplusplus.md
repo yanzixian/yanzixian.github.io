@@ -7,6 +7,142 @@ tags:
 
 [toc]
 
+#### 存储持续性、作用域、链接性
+
+存储持续性：
+
+- 自动存储持续性
+- 静态存储持续性
+- 线程存储持续性
+- 动态存储持续性
+
+作用域：
+
+- 局部
+- 全局
+- 名称空间
+- 类
+
+链接性：
+
+- 内部
+- 外部
+
+#### 名称空间
+
+##### 传统C++名称空间
+
+
+
+##### 新的名称空间特性
+
+1. 全局名称空间（global namespace）：文件级声明区域
+
+2. 用户定义名称空间：
+
+```c++
+namespace  Foo{
+	int foo1;
+    double foo2;
+    void foo3(){...}
+}
+```
+
+`using`编译指令：
+
+```c++
+using namespace Foo;   //使整个名称空间可用，局部
+```
+
+`using`声明：
+
+```c++
+//使特定的标识符可用，添加到所属的声明区域中
+using Foo::foo1;
+using Foo::foo2;
+using Foo::foo3;
+```
+
+- 比较：
+
+`using`声明：
+
+```c++
+namespace Foo{
+	double fetch;
+    ...
+}
+char fetch;
+int main(){
+    using Foo::fetch;
+    int fetch;//错误声明
+   	//或
+    //int fetch;
+    //using Foo::fetch;//错误声明
+    ...
+}
+```
+
+`using`编译指令：
+
+```c++
+namespace Foo{
+	double fetch;
+	...
+}
+char fetch;
+int main(){
+    using namespace Foo;
+    int fetch; //隐藏Foo::fetch
+   	
+    cin>>fetch; //局部 int fetch;
+    cin>>Foo::fetch; //
+    cin>>::fetch;// 全局char fetch
+    ...
+}
+```
+
+- 名称空间嵌套
+
+```c++
+namespace elements{
+	namespace fire{
+		int flame;
+		...
+	}
+	float water;
+	...
+}
+```
+
+名称空间中也可以使用`using`声明和`using`编译指令
+
+- 名称空间别名
+
+```c++
+namespace foo_foo_foo{
+	...
+}
+
+namespace foo3=foo_foo_foo;//别名，用于简化名称或嵌套名称
+```
+
+- 匿名名称空间
+
+```c++
+namespace //未命名
+{
+	int i;
+    double k;
+}
+```
+
+这就像后边跟着`using`编译指令一样；潜在作用域为：声明点到声明区域末尾；
+
+与全局变量类似，但由于没有名称，不能使用`using`声明和`using`编译指令，因此不能在其他文件中使用；
+
+作用与**链接性为内部的静态变量**相同
+
 #### 类
 
 ##### 对象初始化
@@ -64,6 +200,16 @@ Foo foo = Foo(foo1)
 - 返回`const`对象
 
 todo:
+
+##### 特殊成员函数
+
+- 默认构造函数
+- 默认析构函数
+- 复制构造函数
+- 赋值运算符
+- 地址运算符
+- 移动构造函数（C++11）
+- 移动赋值运算符（C++11)
 
 ##### 复制构造函数
 
@@ -550,4 +696,4 @@ auto df(T t,,U u)-> decltype (T*U) {
 
 这里，在编译器遇到参数列表前，T和U不在作用域内，因此需要使用返回类型后置来声明返回类型；
 
- 
+todo: 
