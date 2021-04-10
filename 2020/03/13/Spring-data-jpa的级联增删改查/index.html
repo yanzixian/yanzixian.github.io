@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Souce Code Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yanzixian.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概述此文是为了研究jpa级联表之间的增删改查，对这一方面内容进行一个总结 为了方便描述，使用的数据结构比较简单，书店和书，双向一对多的关系，实体如下： 默认情况下：（即不设置cascade属性，不显式使用CascadeType)Book实体 1234567891011121314151617181920212223@Data@Entity@Tablepublic class Book implem">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring-Data-Jpa的级联增删改查">
+<meta property="og:url" content="http://yanzixian.github.io/2020/03/13/Spring-data-jpa%E7%9A%84%E7%BA%A7%E8%81%94%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/index.html">
+<meta property="og:site_name" content="yanzx">
+<meta property="og:description" content="概述此文是为了研究jpa级联表之间的增删改查，对这一方面内容进行一个总结 为了方便描述，使用的数据结构比较简单，书店和书，双向一对多的关系，实体如下： 默认情况下：（即不设置cascade属性，不显式使用CascadeType)Book实体 1234567891011121314151617181920212223@Data@Entity@Tablepublic class Book implem">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/book%E8%A1%A8.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/book_store%E8%A1%A8.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/book1.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/bookstore1.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/book3.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/bookstore3.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/book4.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/bookstore.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316105134495.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316105924109.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135045425.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135152263.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135601789.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135719870.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316112726938.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316112759295.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316134215353.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316134313700.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316142914670.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316142952323.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145216667.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145244420.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145642382.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145722120.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316152944391.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316153015585.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316160945428.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316161012313.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316162825881.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316162848602.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163218388.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163901618.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163926101.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317092519784.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163901618.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163926101.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317093439406.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317093507329.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163901618.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163926101.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317102542745.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317102720012.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317104912393.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317105048380.png">
+<meta property="og:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/20200317141034.png">
+<meta property="article:published_time" content="2020-03-13T06:14:23.000Z">
+<meta property="article:modified_time" content="2021-04-05T02:46:51.974Z">
+<meta property="article:author" content="yanzx">
+<meta property="article:tag" content="yanzx,blog,前端,后端,java,python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/yanzixian/picBed/raw/master/img202003/book%E8%A1%A8.png">
+
+<link rel="canonical" href="http://yanzixian.github.io/2020/03/13/Spring-data-jpa%E7%9A%84%E7%BA%A7%E8%81%94%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring-Data-Jpa的级联增删改查 | yanzx</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="yanzx" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yanzx</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">写了也没人看系列</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yanzixian" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yanzixian.github.io/2020/03/13/Spring-data-jpa%E7%9A%84%E7%BA%A7%E8%81%94%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yanzx">
+      <meta itemprop="description" content="yanzx的blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yanzx">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring-Data-Jpa的级联增删改查<a href="https://github.com/yanzixian/yanzixian.github.io/tree/hexo/source/_posts/Spring-data-jpa%E7%9A%84%E7%BA%A7%E8%81%94%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-13 14:14:23" itemprop="dateCreated datePublished" datetime="2020-03-13T14:14:23+08:00">2020-03-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-04-05 10:46:51" itemprop="dateModified" datetime="2021-04-05T10:46:51+08:00">2021-04-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/springboot/" itemprop="url" rel="index"><span itemprop="name">springboot</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>此文是为了研究jpa级联表之间的增删改查，对这一方面内容进行一个总结</p>
+<p>为了方便描述，使用的数据结构比较简单，书店和书，双向一对多的关系，实体如下：</p>
+<h4 id="默认情况下：（即不设置cascade属性，不显式使用CascadeType"><a href="#默认情况下：（即不设置cascade属性，不显式使用CascadeType" class="headerlink" title="默认情况下：（即不设置cascade属性，不显式使用CascadeType)"></a>默认情况下：（即不设置cascade属性，不显式使用CascadeType)</h4><p>Book实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 编号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 书名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn</span>(name=<span class="string">"bookstore_id"</span>)</span><br><span class="line">    <span class="keyword">private</span> BookStore bookStore;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>BookStore实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookStore</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany</span>(mappedBy = <span class="string">"bookStore"</span>)</span><br><span class="line">    <span class="keyword">private</span> List&lt;Book&gt; bookList;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>初始数据库表：<br>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/book%E8%A1%A8.png" alt="image-20200313162043590"></p>
+<p>book_store表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/book_store%E8%A1%A8.png" alt="image-20200313162158955"></p>
+<h5 id="save操作"><a href="#save操作" class="headerlink" title="save操作"></a>save操作</h5><h6 id="只对book-store进行保存"><a href="#只对book-store进行保存" class="headerlink" title="只对book_store进行保存"></a>只对book_store进行保存</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book1"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store1"</span>);</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>保存后数据库如下：</p>
+<p>book表：</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/book1.png" alt="image-20200313163415366"></p>
+<p>book_store表：<br><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/bookstore1.png" alt="image-20200313163453556"></p>
+<p>可以看到只有book_store中有数据（id为4是因为之前表里有数据，然后手动进行了删除，所以id从4开始，不要在意这些细节），book表仍为空，说明保存关系被维护端并不会保存对应的关系维护端</p>
+<h6 id="只对book进行保存"><a href="#只对book进行保存" class="headerlink" title="只对book进行保存"></a>只对book进行保存</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span></span>&#123;</span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book2"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store2"</span>);</span><br><span class="line"></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line">   bookRepo.save(b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>出现错误</p>
+<p><code>TransientPropertyValueException: object references an unsaved transient instance - save the transient instance before flushing</code></p>
+<p>错误原因为对b进行持久化（即保存）之前为对bs进行持久化</p>
+<h6 id="先保存bookstore在保存book"><a href="#先保存bookstore在保存book" class="headerlink" title="先保存bookstore在保存book"></a>先保存bookstore在保存book</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test3</span><span class="params">()</span></span>&#123;</span><br><span class="line">		Book b=<span class="keyword">new</span> Book();</span><br><span class="line">		b.setName(<span class="string">"book3"</span>);</span><br><span class="line"></span><br><span class="line">		BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">		bs.setName(<span class="string">"store3"</span>);</span><br><span class="line"></span><br><span class="line">		b.setBookStore(bs);</span><br><span class="line"></span><br><span class="line">		bookStoreRepo.save(bs);</span><br><span class="line">		bookRepo.save(b);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，查看数据库</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/book3.png" alt="image-20200316092924213"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/bookstore3.png" alt="image-20200316093031566"></p>
+<p>可以看到，数据，外键均保存成功</p>
+<h6 id="先保存book在保存bookstore"><a href="#先保存book在保存bookstore" class="headerlink" title="先保存book在保存bookstore"></a>先保存book在保存bookstore</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test4</span><span class="params">()</span></span>&#123;</span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book4"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store4"</span>);</span><br><span class="line"></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line"></span><br><span class="line">   bookRepo.save(b);</span><br><span class="line">   bookStoreRepo.save(bs);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作失败，错误原因与只保存book相同</p>
+<h6 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h6><p>默认情况下，保存关系维护端由于外键的存在，必须后于被维护端进行保存，否则报错；</p>
+<p>保存需要注意顺序，但均需进行保存操作；不会出现只保存一端，另一端也得到保存的情况，即保存没有级联</p>
+<h5 id="delete操作"><a href="#delete操作" class="headerlink" title="delete操作"></a>delete操作</h5><p>执行操作前数据库为：</p>
+<p>book表：</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/book4.png" alt="image-20200316104553527"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/bookstore.png" alt="image-20200316103511017"></p>
+<h6 id="对bookstore表进行删除"><a href="#对bookstore表进行删除" class="headerlink" title="对bookstore表进行删除"></a>对bookstore表进行删除</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test5</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">      Integer id=<span class="number">2</span>;</span><br><span class="line">      BookStore bs1= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">      id=<span class="number">3</span>;</span><br><span class="line">      BookStore bs2= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">      id=<span class="number">4</span>;</span><br><span class="line">      BookStore bs3= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line">      <span class="comment">//操作1</span></span><br><span class="line">      bookStoreRepo.delete(bs1);</span><br><span class="line">      <span class="comment">//操作2</span></span><br><span class="line"><span class="comment">//    bookStoreRepo.delete(bs2);</span></span><br><span class="line">      <span class="comment">//操纵3</span></span><br><span class="line"><span class="comment">//    bookStoreRepo.delete(bs3);</span></span><br><span class="line"></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试代码中，本别对id为2，3，4的bookstore记录进行删除，这几个记录分别关联book表中的2个，1个，0个记录</p>
+<p>其中，操作1，2均执行失败，原因为book表中有指向它们的外键，存在外键约束；操作3执行成功，原因为book表中不存在指向它们的外键，没有外键约束，执行后book表不变，bookstore表如下：</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316105134495.png" alt="image-20200316105134495"></p>
+<h6 id="对book进行删除"><a href="#对book进行删除" class="headerlink" title="对book进行删除"></a>对book进行删除</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test6</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Integer id=<span class="number">1</span>;</span><br><span class="line">   Book b1= bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">2</span>;</span><br><span class="line">   Book b2=bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">3</span>;</span><br><span class="line">   Book b3=bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">5</span>;</span><br><span class="line">   Book b5=bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">6</span>;</span><br><span class="line">   Book b6=bookRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line">   bookRepo.delete(b1);</span><br><span class="line">   bookRepo.delete(b2);</span><br><span class="line">   bookRepo.delete(b3);</span><br><span class="line">   bookRepo.delete(b5);</span><br><span class="line">   bookRepo.delete(b6);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对book表中id为1，2，3，5，6的记录进行删除，操作成功；操作后bookstore表不变，book表如下：</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316105924109.png" alt="image-20200316105924109"></p>
+<p>可以看到记录被成功删除</p>
+<h6 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h6><p>对关系被维护端（bookstore）进行删除时，若关系维护端（book）存在指向要删除记录的外键，由于外键约束，操作会失败；</p>
+<p>对关系维护端（book）删除时，则不需要考虑外键的影响</p>
+<p>对关系维护端的删除（若删除成功）不会导致关系被维护端记录的删除，反过来也不影响，即删除没有级联</p>
+<h5 id="update操作"><a href="#update操作" class="headerlink" title="update操作"></a>update操作</h5><p>数据库表采用上述delete操作之前表的初始状态</p>
+<h6 id="对Book对象进行更新"><a href="#对Book对象进行更新" class="headerlink" title="对Book对象进行更新"></a>对Book对象进行更新</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test15</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Integer id=<span class="number">1</span>;</span><br><span class="line">   Book b1= bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">3</span>;</span><br><span class="line">   Book b2= bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">5</span>;</span><br><span class="line">   Book b3=bookRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line">   b1.setName(<span class="string">"book1_new"</span>);</span><br><span class="line">   b1.getBookStore().setName(<span class="string">"store1_new"</span>);</span><br><span class="line"></span><br><span class="line">   b2.setName(<span class="string">"book2_new"</span>);</span><br><span class="line">   b2.getBookStore().setName(<span class="string">"store2_new"</span>);</span><br><span class="line"></span><br><span class="line">   b3.setName(<span class="string">"book3_new"</span>);</span><br><span class="line"></span><br><span class="line">   bookRepo.save(b1);</span><br><span class="line">   bookRepo.save(b2);</span><br><span class="line">   bookRepo.save(b3);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>更新完成后各表为：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135045425.png" alt="image-20200317135045425"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135152263.png" alt="image-20200317135152263"></p>
+<h6 id="对BookStore对象进行更新"><a href="#对BookStore对象进行更新" class="headerlink" title="对BookStore对象进行更新"></a>对BookStore对象进行更新</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test16</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Integer id=<span class="number">1</span>;</span><br><span class="line">   BookStore bs1= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">2</span>;</span><br><span class="line">   BookStore bs2= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">3</span>;</span><br><span class="line">   BookStore bs3= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   bs1.setName(<span class="string">"store1_new"</span>);</span><br><span class="line">   bs1.getBookList().get(<span class="number">0</span>).setName(<span class="string">"book1_new"</span>);</span><br><span class="line"></span><br><span class="line">   bs2.setName(<span class="string">"store2_new"</span>);</span><br><span class="line">   bs2.getBookList().get(<span class="number">0</span>).setName(<span class="string">"book3_new"</span>);</span><br><span class="line"></span><br><span class="line">   bs3.setName(<span class="string">"store3_new"</span>);</span><br><span class="line">   bs3.getBookList().get(<span class="number">0</span>).setName(<span class="string">"book4_new"</span>);</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs1);</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs2);</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs3);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>更新完成各表为：<br>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135601789.png" alt="image-20200317135601789"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317135719870.png" alt="image-20200317135719870"></p>
+<h6 id="总结：-1"><a href="#总结：-1" class="headerlink" title="总结："></a><strong>总结：</strong></h6><p>默认情况下的更新操作只限定于当前实体中，即一个实体的更新会导致另一实体的数据的改变</p>
+<p>为了保持数据的一致，需要涉及数据改变的实体均进行一次更新操作，即更新没有级联</p>
+<h4 id="级联保存操作（CascadeType-PERSIST）"><a href="#级联保存操作（CascadeType-PERSIST）" class="headerlink" title="级联保存操作（CascadeType.PERSIST）"></a>级联保存操作（<code>CascadeType.PERSIST</code>）</h4><h5 id="只在关系维护端（book）增加CascadeType-PERSIST"><a href="#只在关系维护端（book）增加CascadeType-PERSIST" class="headerlink" title="只在关系维护端（book）增加CascadeType.PERSIST"></a>只在关系维护端（book）增加<code>CascadeType.PERSIST</code></h5><p>在Book实体上设置cascade属性，BookStore实体保持不变：</p>
+<p>Book实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 编号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 书名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">//添加cascade属性</span></span><br><span class="line">    <span class="meta">@ManyToOne</span>(cascade = CascadeType.PERSIST)</span><br><span class="line">    <span class="meta">@JoinColumn</span>(name=<span class="string">"bookstore_id"</span>)</span><br><span class="line">    <span class="keyword">private</span> BookStore bookStore;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>操作前数据库表数据为空</strong></p>
+<h6 id="只对Book对象进行保存"><a href="#只对Book对象进行保存" class="headerlink" title="只对Book对象进行保存"></a><strong>只对Book对象进行保存</strong></h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test7</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book1"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store1"</span>);</span><br><span class="line"></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line"></span><br><span class="line">   bookRepo.save(b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，操作后数据库如下：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316112726938.png" alt="image-20200316112726938"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316112759295.png" alt="image-20200316112759295"></p>
+<p>可以看到，两个表中数据均保存成功，外键也正确设置</p>
+<h6 id="只对BookStore对象进行保存"><a href="#只对BookStore对象进行保存" class="headerlink" title="只对BookStore对象进行保存"></a><strong>只对BookStore对象进行保存</strong></h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test8</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book2"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store2"</span>);</span><br><span class="line"></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line">   </span><br><span class="line">   bookStoreRepo.save(bs);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，数据库结果如下：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316134215353.png" alt="image-20200316134215353"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316134313700.png" alt="image-20200316134313700"></p>
+<p>只有bookstore表中增加了新的数据，book表没有改变</p>
+<h6 id="总结：-2"><a href="#总结：-2" class="headerlink" title="总结："></a><strong>总结：</strong></h6><p>在关系维护端Book实体上添加CascadeType.PERSIST属性，保存Book实体的同时会将与其关联的实体（BookStore）一起进行保存</p>
+<h5 id="只在关系被维护端（bookstore）增加CascadeType-PERSIST"><a href="#只在关系被维护端（bookstore）增加CascadeType-PERSIST" class="headerlink" title="只在关系被维护端（bookstore）增加CascadeType.PERSIST"></a>只在关系被维护端（bookstore）增加<code>CascadeType.PERSIST</code></h5><p>在BookStore实体上设置CascadeType.PERSIST，Book实体保持不变</p>
+<p>BookStore实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookStore</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">//设置cascade属性</span></span><br><span class="line">    <span class="meta">@OneToMany</span>(mappedBy = <span class="string">"bookStore"</span>,cascade = CascadeType.PERSIST)</span><br><span class="line">    <span class="keyword">private</span> List&lt;Book&gt; bookList;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>操作前数据库表数据为空</strong></p>
+<h6 id="只对BookStore对象进行保存-1"><a href="#只对BookStore对象进行保存-1" class="headerlink" title="只对BookStore对象进行保存"></a>只对BookStore对象进行保存</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test9</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book1"</span>);</span><br><span class="line"></span><br><span class="line">   Book b1=<span class="keyword">new</span> Book();</span><br><span class="line">   b1.setName(<span class="string">"book2"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store1"</span>);</span><br><span class="line">    <span class="comment">//不加下面两行会导致book表中外键为空</span></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line">   b1.setBookStore(bs);</span><br><span class="line"></span><br><span class="line">   bs.setBookList(Arrays.asList(b,b1));</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，数据库保存成功，操作完成后数据库如下：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316142914670.png" alt="image-20200316142914670"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316142952323.png" alt="image-20200316142952323"></p>
+<p>可以看到数据成功保存，外键也成功添加</p>
+<p><strong>注意：</strong></p>
+<p>在实际操作过程中，因为漏加下面两句，虽然数据库数据可以成功保存，但book表中外键列为空，原因个人认为是BookStore为被维护端，无法负责外键的更新</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">b.setBookStore(bs);</span><br><span class="line">b1.setBookStore(bs);</span><br></pre></td></tr></table></figure>
+
+<h6 id="只对Book对象进行保存-1"><a href="#只对Book对象进行保存-1" class="headerlink" title="只对Book对象进行保存"></a>只对Book对象进行保存</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test10</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book3"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store2"</span>);</span><br><span class="line"></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line"></span><br><span class="line">   bookRepo.save(b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序报错，报错原因与”默认情况下的只对Book对象进行保存”报错原因相同</p>
+<h5 id="在维护端和被维护端均设置CascadeType-PERSIST"><a href="#在维护端和被维护端均设置CascadeType-PERSIST" class="headerlink" title="在维护端和被维护端均设置CascadeType.PERSIST"></a>在维护端和被维护端均设置<code>CascadeType.PERSIST</code></h5><p>Book实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 编号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 书名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">//添加cascade属性</span></span><br><span class="line">    <span class="meta">@ManyToOne</span>(cascade = CascadeType.PERSIST)</span><br><span class="line">    <span class="meta">@JoinColumn</span>(name=<span class="string">"bookstore_id"</span>)</span><br><span class="line">    <span class="keyword">private</span> BookStore bookStore;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>BookStore实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookStore</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">//添加cascade属性</span></span><br><span class="line">    <span class="meta">@OneToMany</span>(mappedBy = <span class="string">"bookStore"</span>,cascade = CascadeType.PERSIST)</span><br><span class="line">    <span class="keyword">private</span> List&lt;Book&gt; bookList;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>操作前数据库表数据为空</strong></p>
+<h6 id="只对Book对象进行保存-2"><a href="#只对Book对象进行保存-2" class="headerlink" title="只对Book对象进行保存"></a>只对Book对象进行保存</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test7</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book1"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store1"</span>);</span><br><span class="line"></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line"></span><br><span class="line">   bookRepo.save(b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，数据保存成功</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145216667.png" alt="image-20200316145216667"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145244420.png" alt="image-20200316145244420"></p>
+<h6 id="只对BookStore对象进行保存-2"><a href="#只对BookStore对象进行保存-2" class="headerlink" title="只对BookStore对象进行保存"></a>只对BookStore对象进行保存</h6><p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test9</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Book b=<span class="keyword">new</span> Book();</span><br><span class="line">   b.setName(<span class="string">"book2"</span>);</span><br><span class="line"></span><br><span class="line">   Book b1=<span class="keyword">new</span> Book();</span><br><span class="line">   b1.setName(<span class="string">"book3"</span>);</span><br><span class="line"></span><br><span class="line">   BookStore bs=<span class="keyword">new</span> BookStore();</span><br><span class="line">   bs.setName(<span class="string">"store2"</span>);</span><br><span class="line">    <span class="comment">//不加下面两行会导致book表中外键为空</span></span><br><span class="line">   b.setBookStore(bs);</span><br><span class="line">   b1.setBookStore(bs);</span><br><span class="line"></span><br><span class="line">   bs.setBookList(Arrays.asList(b,b1));</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，数据库表如下：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145642382.png" alt="image-20200316145642382"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316145722120.png" alt="image-20200316145722120"></p>
+<h5 id="总结：-3"><a href="#总结：-3" class="headerlink" title="总结："></a><strong>总结：</strong></h5><p>cascade属性的设置即赋予了当前实体操作与之关联的另一实体的权限</p>
+<p>属性值为<code>CascadeType.PERSIST</code>时，即赋予当前实体保存另一实体的权限，即保存当前实体时，也会级联保存与之关联的实体</p>
+<p>在本例中，在Book实体中设置bookStore的cascade属性为<code>CacadeType.PERSIST</code>，即赋予Book保存BookStore实体的权限；在BookStore实体中设置bookList的cascade属性为<code>CacadeType.PERSIST</code>，即赋予BookStore保存Book实体的权限；但同时也要注意维护端和被维护端的不同之处，外键的更新只能由维护端来负责</p>
+<h4 id="级联删除操作（CascadeType-REMOVE）"><a href="#级联删除操作（CascadeType-REMOVE）" class="headerlink" title="级联删除操作（CascadeType.REMOVE）"></a>级联删除操作（<code>CascadeType.REMOVE</code>）</h4><h5 id="只在关系维护端（book）设置CascadeType-REMOVE"><a href="#只在关系维护端（book）设置CascadeType-REMOVE" class="headerlink" title="只在关系维护端（book）设置CascadeType.REMOVE"></a>只在关系维护端（book）设置<code>CascadeType.REMOVE</code></h5><p>在Book实体中设置cascade</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 编号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 书名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">	<span class="comment">//设置cascade属性</span></span><br><span class="line">    <span class="meta">@ManyToOne</span>(cascade = CascadeType.REMOVE)</span><br><span class="line">    <span class="meta">@JoinColumn</span>(name=<span class="string">"bookstore_id"</span>)</span><br><span class="line">    <span class="keyword">private</span> BookStore bookStore;</span><br></pre></td></tr></table></figure>
+
+<h6 id="只对book进行删除"><a href="#只对book进行删除" class="headerlink" title="只对book进行删除"></a>只对book进行删除</h6><p>删除前各表为：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316152944391.png" alt="image-20200316152944391"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316153015585.png" alt="image-20200316153015585"></p>
+<p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test11</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">		Integer id=<span class="number">1</span>;</span><br><span class="line">		Book b1= bookRepo.findById(id.longValue()).get();</span><br><span class="line">		id=<span class="number">2</span>;</span><br><span class="line">		Book b2= bookRepo.findById(id.longValue()).get();</span><br><span class="line">		id=<span class="number">3</span>;</span><br><span class="line">		Book b3=bookRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line">		List&lt;Book&gt; list=<span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">		list.add(b1);</span><br><span class="line">		list.add(b2);</span><br><span class="line"></span><br><span class="line">		bookRepo.deleteAll(list);</span><br><span class="line">		bookRepo.delete(b3);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，数据库结果如下：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316160945428.png" alt="image-20200316160945428"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316161012313.png" alt="image-20200316161012313"></p>
+<p>两个表均为空，数据全部删除，实现级联删除</p>
+<p><strong>注意：</strong></p>
+<p>设置<code>CascadeType.REMOVE</code>，实体删除时会删除与之相关联的实体</p>
+<p>如上book表中，id为1，2的记录均有指向bookstore表中id=1的记录的外键；当单独删除book1时，理论上会导致与之关联的store1删除，但又由于book2有指向store1的外键，故这样会导致book2外键指向为空，会报错；单独删除book2同理；</p>
+<p>所以单独删除是不会成功的，故上述测试代码使用了一个List，使用deleteAll进行全部删除；</p>
+<p>删除过程为先更新book中所有相关记录的外键为空值，再删除一条book记录，再删除bookstore记录；有多个book记录时，先删除一条book记录，再删除bookstore的记录，再删除剩余的book记录</p>
+<h6 id="只对bookstore进行删除"><a href="#只对bookstore进行删除" class="headerlink" title="只对bookstore进行删除"></a>只对bookstore进行删除</h6><p>操作前数据库表为：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316162825881.png" alt="image-20200316162825881"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316162848602.png" alt="image-20200316162848602"></p>
+<p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test12</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">      Integer id=<span class="number">1</span>;</span><br><span class="line">      BookStore bs1= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">      id=<span class="number">2</span>;</span><br><span class="line">      BookStore bs2= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//    操作1</span></span><br><span class="line">      bookStoreRepo.delete(bs1);</span><br><span class="line">      <span class="comment">//操作2</span></span><br><span class="line"><span class="comment">//    bookStoreRepo.delete(bs2);</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作1删除store1记录失败，因为book表中有指向它的外键；表里数据均不变</p>
+<p>操作2删除store2成功，没有键约束，book表不变；bookstore表如下：</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163218388.png" alt="image-20200316163218388"></p>
+<h5 id="只在关系被维护端（bookstore）设置CascadeType-REMOVE"><a href="#只在关系被维护端（bookstore）设置CascadeType-REMOVE" class="headerlink" title="只在关系被维护端（bookstore）设置CascadeType.REMOVE"></a>只在关系被维护端（bookstore）设置<code>CascadeType.REMOVE</code></h5><p>在BookStore实体中设置cascade</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookStore</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany</span>(mappedBy = <span class="string">"bookStore"</span>,cascade = CascadeType.REMOVE)</span><br><span class="line">    <span class="keyword">private</span> List&lt;Book&gt; bookList;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="只对book进行删除-1"><a href="#只对book进行删除-1" class="headerlink" title="只对book进行删除"></a>只对book进行删除</h6><p>删除前数据库表为：<br>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163901618.png" alt="image-20200316163901618"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163926101.png" alt="image-20200316163926101"></p>
+<p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test13</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Integer id=<span class="number">1</span>;</span><br><span class="line">   Book b1= bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">3</span>;</span><br><span class="line">   Book b2= bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">5</span>;</span><br><span class="line">   Book b3=bookRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line">   bookRepo.delete(b1);</span><br><span class="line">   bookRepo.delete(b2);</span><br><span class="line">   bookRepo.delete(b3);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对book表中id为1，3，5的记录进行删除，操作成功，操作完成数据库表为：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317092519784.png" alt="image-20200317092519784"></p>
+<p>bookstore未改变</p>
+<h6 id="只对bookstore进行删除-1"><a href="#只对bookstore进行删除-1" class="headerlink" title="只对bookstore进行删除"></a>只对bookstore进行删除</h6><p>删除前数据库表与上述初始相同</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163901618.png" alt="image-20200316163901618"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163926101.png" alt="image-20200316163926101"></p>
+<p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test14</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Integer id=<span class="number">1</span>;</span><br><span class="line">   BookStore bs1= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">2</span>;</span><br><span class="line">   BookStore bs2= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">3</span>;</span><br><span class="line">   BookStore bs3= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line">   <span class="comment">//操作1</span></span><br><span class="line">   bookStoreRepo.delete(bs1);</span><br><span class="line">   <span class="comment">//操作2</span></span><br><span class="line">   bookStoreRepo.delete(bs2);</span><br><span class="line">   <span class="comment">//操作3</span></span><br><span class="line">   bookStoreRepo.delete(bs3);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对bookstore表中id为1，2，3的记录进行删除，操作成功， 操作完成后数据库表为：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317093439406.png" alt="image-20200317093439406"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317093507329.png" alt="image-20200317093507329"></p>
+<p>可以看到bookstore中的记录删除成功，同时book表中与之相关联的记录也被删除，实现了级联删除</p>
+<h5 id="总结：-4"><a href="#总结：-4" class="headerlink" title="总结："></a><strong>总结：</strong></h5><p>cascade属性值为<code>CascadeType.REMOVE</code>时，赋予了当前实体删除另一实体中记录的权限，即删除当前实体记录时，也会删除级联实体中与之相关联（外键映射）的记录</p>
+<p>没有设置<code>CascadeType.REMOVE</code>的实体进行删除时与默认情况相同</p>
+<p>关系维护端和关系被维护端进行级联删除时情况稍有不同，关系维护端进行级联删除时要注意将拥有相同外键映射的记录一起删除，否则会因为外键约束的原因而导致操作失败，但这种删除操作实际中一般使用场景不多；</p>
+<h4 id="级联更新操作（CascadeType-MERGE）"><a href="#级联更新操作（CascadeType-MERGE）" class="headerlink" title="级联更新操作（CascadeType.MERGE）"></a>级联更新操作（<code>CascadeType.MERGE</code>）</h4><h5 id="在关系维护端-book-设置cascade-CascadeType-MERGE"><a href="#在关系维护端-book-设置cascade-CascadeType-MERGE" class="headerlink" title="在关系维护端(book)设置cascade=CascadeType.MERGE"></a>在关系维护端(book)设置cascade=<code>CascadeType.MERGE</code></h5><p>在Book实体中设置cascade</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 编号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 书名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">	<span class="comment">//设置cascade</span></span><br><span class="line">    <span class="meta">@ManyToOne</span>(cascade = CascadeType.MERGE)</span><br><span class="line">    <span class="meta">@JoinColumn</span>(name=<span class="string">"bookstore_id"</span>)</span><br><span class="line">    <span class="keyword">private</span> BookStore bookStore;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="对Book对象进行更新-1"><a href="#对Book对象进行更新-1" class="headerlink" title="对Book对象进行更新"></a>对Book对象进行更新</h6><p>更新前表为</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163901618.png" alt="image-20200316163901618"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200316163926101.png" alt="image-20200316163926101"></p>
+<p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test15</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Integer id=<span class="number">1</span>;</span><br><span class="line">   Book b1= bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">3</span>;</span><br><span class="line">   Book b2= bookRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">5</span>;</span><br><span class="line">   Book b3=bookRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line">   b1.setName(<span class="string">"book1_new"</span>);</span><br><span class="line">   b1.getBookStore().setName(<span class="string">"store1_new"</span>);</span><br><span class="line"></span><br><span class="line">   b2.setName(<span class="string">"book2_new"</span>);</span><br><span class="line">   b2.getBookStore().setName(<span class="string">"store2_new"</span>);</span><br><span class="line"></span><br><span class="line">   b3.setName(<span class="string">"book3_new"</span>);</span><br><span class="line"></span><br><span class="line">   bookRepo.save(b1);</span><br><span class="line">   bookRepo.save(b2);</span><br><span class="line">   bookRepo.save(b3);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>更新成功，更新后各表为：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317102542745.png" alt="image-20200317102542745"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317102720012.png" alt="image-20200317102720012"></p>
+<p>可以看到，更改了Book对象中BookStore属性的name属性，保存对象时不但book表得到更新，bookstore也相应地更新，实现了级联更新</p>
+<h6 id="对BookStore对象进行更新-1"><a href="#对BookStore对象进行更新-1" class="headerlink" title="对BookStore对象进行更新"></a>对BookStore对象进行更新</h6><p>更新前表恢复为原状</p>
+<p>测试代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test16</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">   Integer id=<span class="number">1</span>;</span><br><span class="line">   BookStore bs1= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">2</span>;</span><br><span class="line">   BookStore bs2= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line">   id=<span class="number">3</span>;</span><br><span class="line">   BookStore bs3= bookStoreRepo.findById(id.longValue()).get();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   bs1.setName(<span class="string">"store1_new"</span>);</span><br><span class="line">   bs1.getBookList().get(<span class="number">0</span>).setName(<span class="string">"book1_new"</span>);</span><br><span class="line"></span><br><span class="line">   bs2.setName(<span class="string">"store2_new"</span>);</span><br><span class="line">   bs2.getBookList().get(<span class="number">0</span>).setName(<span class="string">"book3_new"</span>);</span><br><span class="line"></span><br><span class="line">   bs3.setName(<span class="string">"store3_new"</span>);</span><br><span class="line">   bs3.getBookList().get(<span class="number">0</span>).setName(<span class="string">"book4_new"</span>);</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs1);</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs2);</span><br><span class="line"></span><br><span class="line">   bookStoreRepo.save(bs3);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>操作成功，更新后各表为：</p>
+<p>book表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317104912393.png" alt="image-20200317104912393"></p>
+<p>bookstore表</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/image-20200317105048380.png" alt="image-20200317105048380"></p>
+<p>可以看到更改BookStore对象中的name属性、以及其中的Book属性的name时，只有bookstore表得到了更新</p>
+<h5 id="在关系被维护端-BookStore-设置cascade-CascadeType-MERGE"><a href="#在关系被维护端-BookStore-设置cascade-CascadeType-MERGE" class="headerlink" title="在关系被维护端(BookStore)设置cascade=CascadeType.MERGE"></a>在关系被维护端(BookStore)设置cascade=CascadeType.MERGE</h5><p>在BookStore实体中设置cascade</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookStore</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"id"</span>)</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column</span>(name=<span class="string">"name"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">	<span class="comment">//设置cascade</span></span><br><span class="line">    <span class="meta">@OneToMany</span>(mappedBy = <span class="string">"bookStore"</span>,fetch = FetchType.EAGER,cascade = CascadeType.MERGE)</span><br><span class="line">    <span class="keyword">private</span> List&lt;Book&gt; bookList;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是采用上述的数据库表，和测试代码test15、test16</p>
+<p>可以得到结论正好与上述情况相反，test15没有实现级联更新，test16实现了级联更新</p>
+<h5 id="总结：-5"><a href="#总结：-5" class="headerlink" title="总结："></a><strong>总结：</strong></h5><p>cascade属性值为<code>CascadeType.MERGE</code>时，赋予了当前实体更新另一实体的权限，即更改当前实体对象中代表另一实体对象的属性时（如更改Book对象中的BookStore属性），可以时另一实体的数据库表也得到更新，即级联更新，无需再单独进行更新</p>
+<p>若需要两个实体对象可以互相更新，只需两个实体类中都设置<code>CascadeType.MERGE</code>即可</p>
+<hr>
+<p>（ps  还差个REFRESH，写不下去了，有时间再看吧）</p>
+<p><img src="https://gitee.com/yanzixian/picBed/raw/master/img202003/20200317141034.png" alt=""></p>
+<p>2020/3/17</p>
+<hr>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/10/JPA%E7%9A%84CascadeType%E5%92%8CFetchType/" rel="prev" title="JPA的CascadeType和FetchType">
+      <i class="fa fa-chevron-left"></i> JPA的CascadeType和FetchType
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/07/vue-ref%E5%92%8Crefs/" rel="next" title="Vue Ref和refs">
+      Vue Ref和refs <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%9A%EF%BC%88%E5%8D%B3%E4%B8%8D%E8%AE%BE%E7%BD%AEcascade%E5%B1%9E%E6%80%A7%EF%BC%8C%E4%B8%8D%E6%98%BE%E5%BC%8F%E4%BD%BF%E7%94%A8CascadeType"><span class="nav-number">1.1.</span> <span class="nav-text">默认情况下：（即不设置cascade属性，不显式使用CascadeType)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#save%E6%93%8D%E4%BD%9C"><span class="nav-number">1.1.1.</span> <span class="nav-text">save操作</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9book-store%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">只对book_store进行保存</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9book%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">只对book进行保存</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%85%88%E4%BF%9D%E5%AD%98bookstore%E5%9C%A8%E4%BF%9D%E5%AD%98book"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">先保存bookstore在保存book</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%85%88%E4%BF%9D%E5%AD%98book%E5%9C%A8%E4%BF%9D%E5%AD%98bookstore"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">先保存book在保存bookstore</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="nav-number">1.1.1.5.</span> <span class="nav-text">总结：</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#delete%E6%93%8D%E4%BD%9C"><span class="nav-number">1.1.2.</span> <span class="nav-text">delete操作</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AF%B9bookstore%E8%A1%A8%E8%BF%9B%E8%A1%8C%E5%88%A0%E9%99%A4"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">对bookstore表进行删除</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AF%B9book%E8%BF%9B%E8%A1%8C%E5%88%A0%E9%99%A4"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">对book进行删除</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#update%E6%93%8D%E4%BD%9C"><span class="nav-number">1.1.3.</span> <span class="nav-text">update操作</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AF%B9Book%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E6%9B%B4%E6%96%B0"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">对Book对象进行更新</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AF%B9BookStore%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E6%9B%B4%E6%96%B0"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">对BookStore对象进行更新</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A-1"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">总结：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%A7%E8%81%94%E4%BF%9D%E5%AD%98%E6%93%8D%E4%BD%9C%EF%BC%88CascadeType-PERSIST%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">级联保存操作（CascadeType.PERSIST）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AA%E5%9C%A8%E5%85%B3%E7%B3%BB%E7%BB%B4%E6%8A%A4%E7%AB%AF%EF%BC%88book%EF%BC%89%E5%A2%9E%E5%8A%A0CascadeType-PERSIST"><span class="nav-number">1.2.1.</span> <span class="nav-text">只在关系维护端（book）增加CascadeType.PERSIST</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9Book%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">只对Book对象进行保存</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9BookStore%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">只对BookStore对象进行保存</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A-2"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">总结：</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AA%E5%9C%A8%E5%85%B3%E7%B3%BB%E8%A2%AB%E7%BB%B4%E6%8A%A4%E7%AB%AF%EF%BC%88bookstore%EF%BC%89%E5%A2%9E%E5%8A%A0CascadeType-PERSIST"><span class="nav-number">1.2.2.</span> <span class="nav-text">只在关系被维护端（bookstore）增加CascadeType.PERSIST</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9BookStore%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98-1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">只对BookStore对象进行保存</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9Book%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98-1"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">只对Book对象进行保存</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%A8%E7%BB%B4%E6%8A%A4%E7%AB%AF%E5%92%8C%E8%A2%AB%E7%BB%B4%E6%8A%A4%E7%AB%AF%E5%9D%87%E8%AE%BE%E7%BD%AECascadeType-PERSIST"><span class="nav-number">1.2.3.</span> <span class="nav-text">在维护端和被维护端均设置CascadeType.PERSIST</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9Book%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98-2"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">只对Book对象进行保存</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9BookStore%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98-2"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">只对BookStore对象进行保存</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A-3"><span class="nav-number">1.2.4.</span> <span class="nav-text">总结：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%A7%E8%81%94%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C%EF%BC%88CascadeType-REMOVE%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">级联删除操作（CascadeType.REMOVE）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AA%E5%9C%A8%E5%85%B3%E7%B3%BB%E7%BB%B4%E6%8A%A4%E7%AB%AF%EF%BC%88book%EF%BC%89%E8%AE%BE%E7%BD%AECascadeType-REMOVE"><span class="nav-number">1.3.1.</span> <span class="nav-text">只在关系维护端（book）设置CascadeType.REMOVE</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9book%E8%BF%9B%E8%A1%8C%E5%88%A0%E9%99%A4"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">只对book进行删除</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9bookstore%E8%BF%9B%E8%A1%8C%E5%88%A0%E9%99%A4"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">只对bookstore进行删除</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AA%E5%9C%A8%E5%85%B3%E7%B3%BB%E8%A2%AB%E7%BB%B4%E6%8A%A4%E7%AB%AF%EF%BC%88bookstore%EF%BC%89%E8%AE%BE%E7%BD%AECascadeType-REMOVE"><span class="nav-number">1.3.2.</span> <span class="nav-text">只在关系被维护端（bookstore）设置CascadeType.REMOVE</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9book%E8%BF%9B%E8%A1%8C%E5%88%A0%E9%99%A4-1"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">只对book进行删除</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%AA%E5%AF%B9bookstore%E8%BF%9B%E8%A1%8C%E5%88%A0%E9%99%A4-1"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">只对bookstore进行删除</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A-4"><span class="nav-number">1.3.3.</span> <span class="nav-text">总结：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%A7%E8%81%94%E6%9B%B4%E6%96%B0%E6%93%8D%E4%BD%9C%EF%BC%88CascadeType-MERGE%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">级联更新操作（CascadeType.MERGE）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%A8%E5%85%B3%E7%B3%BB%E7%BB%B4%E6%8A%A4%E7%AB%AF-book-%E8%AE%BE%E7%BD%AEcascade-CascadeType-MERGE"><span class="nav-number">1.4.1.</span> <span class="nav-text">在关系维护端(book)设置cascade&#x3D;CascadeType.MERGE</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AF%B9Book%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E6%9B%B4%E6%96%B0-1"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">对Book对象进行更新</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AF%B9BookStore%E5%AF%B9%E8%B1%A1%E8%BF%9B%E8%A1%8C%E6%9B%B4%E6%96%B0-1"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">对BookStore对象进行更新</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%A8%E5%85%B3%E7%B3%BB%E8%A2%AB%E7%BB%B4%E6%8A%A4%E7%AB%AF-BookStore-%E8%AE%BE%E7%BD%AEcascade-CascadeType-MERGE"><span class="nav-number">1.4.2.</span> <span class="nav-text">在关系被维护端(BookStore)设置cascade&#x3D;CascadeType.MERGE</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A-5"><span class="nav-number">1.4.3.</span> <span class="nav-text">总结：</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yanzx"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">yanzx</p>
+  <div class="site-description" itemprop="description">yanzx的blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yanzixian" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yanzixian" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yanzx73@163.com" title="E-Mail → mailto:yanzx73@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yanzx</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

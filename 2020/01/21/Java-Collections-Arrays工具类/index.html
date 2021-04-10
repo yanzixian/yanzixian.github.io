@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Souce Code Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yanzixian.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概述Collections，Arrays是两个位于java.util包中中的工具类，主要提供对于集合和数组的操作方法，其提供的方法均是静态方法，无需实例化对象，通过类名直接调用即可 Collections定义：public class Collections {...} 与Collection不同，Collection是一个集合接口，其中的方法只进行定义，没有实现；而Collections是一个类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java-Collections,Arrays工具类">
+<meta property="og:url" content="http://yanzixian.github.io/2020/01/21/Java-Collections-Arrays%E5%B7%A5%E5%85%B7%E7%B1%BB/index.html">
+<meta property="og:site_name" content="yanzx">
+<meta property="og:description" content="概述Collections，Arrays是两个位于java.util包中中的工具类，主要提供对于集合和数组的操作方法，其提供的方法均是静态方法，无需实例化对象，通过类名直接调用即可 Collections定义：public class Collections {...} 与Collection不同，Collection是一个集合接口，其中的方法只进行定义，没有实现；而Collections是一个类">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-21T03:00:38.000Z">
+<meta property="article:modified_time" content="2021-04-05T02:46:51.970Z">
+<meta property="article:author" content="yanzx">
+<meta property="article:tag" content="yanzx,blog,前端,后端,java,python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yanzixian.github.io/2020/01/21/Java-Collections-Arrays%E5%B7%A5%E5%85%B7%E7%B1%BB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java-Collections,Arrays工具类 | yanzx</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="yanzx" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yanzx</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">写了也没人看系列</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/yanzixian" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yanzixian.github.io/2020/01/21/Java-Collections-Arrays%E5%B7%A5%E5%85%B7%E7%B1%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yanzx">
+      <meta itemprop="description" content="yanzx的blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yanzx">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java-Collections,Arrays工具类<a href="https://github.com/yanzixian/yanzixian.github.io/tree/hexo/source/_posts/Java-Collections-Arrays%E5%B7%A5%E5%85%B7%E7%B1%BB.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-21 11:00:38" itemprop="dateCreated datePublished" datetime="2020-01-21T11:00:38+08:00">2020-01-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-04-05 10:46:51" itemprop="dateModified" datetime="2021-04-05T10:46:51+08:00">2021-04-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Collections，Arrays是两个位于java.util包中中的工具类，主要提供对于集合和数组的操作方法，其提供的方法均是静态方法，无需实例化对象，通过类名直接调用即可</p>
+<h3 id="Collections"><a href="#Collections" class="headerlink" title="Collections"></a>Collections</h3><h4 id="定义："><a href="#定义：" class="headerlink" title="定义："></a>定义：</h4><p><code>public class Collections {...}</code></p>
+<p>与Collection不同，Collection是一个集合接口，其中的方法只进行定义，没有实现；而Collections是一个类，其中的方法均进行了实现</p>
+<h4 id="提供的方法："><a href="#提供的方法：" class="headerlink" title="提供的方法："></a>提供的方法：</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends Comparable&lt;? <span class="keyword">super</span> T&gt;&gt; <span class="function"><span class="keyword">void</span> <span class="title">sort</span><span class="params">(List&lt;T&gt; list)</span></span>&#123;...&#125;<span class="comment">//对指定列表中的元素进行升序排列，列表中的元素必须实现Comparable接口，排序算法稳定</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">int</span> <span class="title">binarySearch</span><span class="params">(List&lt;? extends Comparable&lt;? <span class="keyword">super</span> T&gt;&gt; list, T key)</span> </span>&#123;...&#125;<span class="comment">//在指定的列表中使用二分查找搜索指定的元素，列表中元素必须为升序排列；若列表中有多个与key相同的元素，不能保证找到哪一个;主要实现是根据列表的大小和是否可以随机访问分别调用了下面两个方法</span></span><br><span class="line"><span class="comment">//private static &lt;T&gt; int indexedBinarySearch(List&lt;? extends Comparable&lt;? super T&gt;&gt; list, T key)&#123;...&#125;//私有方法，在binarySearch中进行了调用</span></span><br><span class="line"><span class="comment">//private static &lt;T&gt; int iteratorBinarySearch(List&lt;? extends Comparable&lt;? super T&gt;&gt; list, T key)&#123;...&#125;//私有方法，在binarySearch中进行了调用</span></span><br><span class="line"><span class="comment">//private static &lt;T&gt; T get(ListIterator&lt;? extends T&gt; i, int index) &#123;&#125;//私有方法，在iteratorBinarySearch中进行了调用</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">int</span> <span class="title">binarySearch</span><span class="params">(List&lt;? extends T&gt; list, T key, Comparator&lt;? <span class="keyword">super</span> T&gt; c)</span> </span>&#123;...&#125;<span class="comment">////在指定的列表中使用二分查找搜索指定的元素，列表中元素必须为升序排列，按照指定的比较器c；若列表中有多个与key相同的元素，不能保证找到哪一个</span></span><br><span class="line"><span class="comment">//同样调用了以下两个方法</span></span><br><span class="line"><span class="comment">//private static &lt;T&gt; int indexedBinarySearch(List&lt;? extends T&gt; l, T key, Comparator&lt;? super T&gt; c) &#123;&#125;</span></span><br><span class="line"><span class="comment">//private static &lt;T&gt; int iteratorBinarySearch(List&lt;? extends T&gt; l, T key, Comparator&lt;? super T&gt; c) &#123;&#125;</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">reverse</span><span class="params">(List&lt;?&gt; list)</span> </span>&#123;...&#125;<span class="comment">//反转指定列表中元素的顺序，线性时间内完成</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">shuffle</span><span class="params">(List&lt;?&gt; list)</span> </span>&#123;...&#125;<span class="comment">//随机打乱指定列表中元素的顺序</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">shuffle</span><span class="params">(List&lt;?&gt; list, Random rnd)</span> </span>&#123;...&#125;<span class="comment">//使用指定的随机序列打乱指定列表中元素的顺序</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(List&lt;?&gt; list, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;..&#125;<span class="comment">//在指定的列表中交换指定位置的元素</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(Object[] arr, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;...&#125;<span class="comment">//在指定的数组中交换指定位置的元素</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">fill</span><span class="params">(List&lt;? <span class="keyword">super</span> T&gt; list, T obj)</span> </span>&#123;...&#125;<span class="comment">//用指定的元素替换掉指定列表中的所有元素</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">copy</span><span class="params">(List&lt;? <span class="keyword">super</span> T&gt; dest, List&lt;? extends T&gt; src)</span> </span>&#123;..&#125;<span class="comment">//从指定的列表中复制元素至另一个列表，index不变，即元素顺序不改变，目标列表大小必须大于等于源列表。dest-目标列表，src-源列表</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends Object &amp; Comparable&lt;? <span class="keyword">super</span> T&gt;&gt; <span class="function">T <span class="title">min</span><span class="params">(Collection&lt;? extends T&gt; coll)</span> </span>&#123;...&#125;<span class="comment">//返回集合中的最小元素，根据元素的自然排序</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">min</span><span class="params">(Collection&lt;? extends T&gt; coll, Comparator&lt;? <span class="keyword">super</span> T&gt; comp)</span> </span>&#123;...&#125;<span class="comment">//返回集合中的最小元素，根据指定的比较器</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends Object &amp; Comparable&lt;? <span class="keyword">super</span> T&gt;&gt; <span class="function">T <span class="title">max</span><span class="params">(Collection&lt;? extends T&gt; coll)</span> </span>&#123;...&#125;<span class="comment">//返回集合中的最大元素，根据元素的自然排序</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">max</span><span class="params">(Collection&lt;? extends T&gt; coll, Comparator&lt;? <span class="keyword">super</span> T&gt; comp)</span> </span>&#123;...&#125;<span class="comment">//返回集合中最大元素，根据指定的比较器</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">rotate</span><span class="params">(List&lt;?&gt; list, <span class="keyword">int</span> distance)</span> </span>&#123;..&#125;<span class="comment">//将指定列表中的元素循环移位指定距离，distance&gt;0，循环向右移，distance&lt;0，循环向左移，实现方式是调用了下面两个私有方法</span></span><br><span class="line"><span class="comment">//private static &lt;T&gt; void rotate1(List&lt;T&gt; list, int distance) &#123;&#125;</span></span><br><span class="line"><span class="comment">//private static void rotate2(List&lt;?&gt; list, int distance) &#123;&#125;</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">boolean</span> <span class="title">replaceAll</span><span class="params">(List&lt;T&gt; list, T oldVal, T newVal)</span> </span>&#123;...&#125;<span class="comment">//用新元素（newVal）置换掉指定列表中的所有指定元素(oldVal)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">indexOfSubList</span><span class="params">(List&lt;?&gt; source, List&lt;?&gt; target)</span> </span>&#123;..&#125;<span class="comment">//返回targer列表在source列表中第一次出现的位置，即满足条件  source.subList(i, i+target.size()).equals(target)  的最小i值</span></span><br><span class="line"><span class="comment">//没有出现或、target的大小大于source0时返回-1</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">lastIndexOfSubList</span><span class="params">(List&lt;?&gt; source, List&lt;?&gt; target)</span> </span>&#123;...&#125;<span class="comment">//返回targer列表在source列表中最后一次出现的位置，即满足条件  source.subList(i, i+target.size()).equals(target)  的最大i值</span></span><br><span class="line"><span class="comment">//没有出现或、target的大小大于source时返回-1</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Collection&lt;T&gt; <span class="title">unmodifiableCollection</span><span class="params">(Collection&lt;? extends T&gt; c)</span> </span>&#123;...&#125;<span class="comment">//返回一个c的不可修改的集合，返回的集合不会将equals()方法和hashCode()方法传到底层集合</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Set&lt;T&gt; <span class="title">unmodifiableSet</span><span class="params">(Set&lt;? extends T&gt; s)</span></span>&#123;...&#125;<span class="comment">//返回一个不可修改的Set集合</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">SortedSet&lt;T&gt; <span class="title">unmodifiableSortedSet</span><span class="params">(SortedSet&lt;T&gt; s)</span></span>&#123;...&#125;<span class="comment">//返回一个不可修改的有序Set集合</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">NavigableSet&lt;T&gt; <span class="title">unmodifiableNavigableSet</span><span class="params">(NavigableSet&lt;T&gt; s)</span> </span>&#123;...&#125;<span class="comment">//返回一个不可修改的NavigableSet</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">unmodifiableList</span><span class="params">(List&lt;? extends T&gt; list)</span> </span>&#123;...&#125;<span class="comment">//返回一个不可修改的List</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">Map&lt;K,V&gt; <span class="title">unmodifiableMap</span><span class="params">(Map&lt;? extends K, ? extends V&gt; m)</span></span>&#123;...&#125;<span class="comment">//返回一个不可修改的Map</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">SortedMap&lt;K,V&gt; <span class="title">unmodifiableSortedMap</span><span class="params">(SortedMap&lt;K, ? extends V&gt; m)</span> </span>&#123;&#125;<span class="comment">//返回一个不可修改的有序Map</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">NavigableMap&lt;K,V&gt; <span class="title">unmodifiableNavigableMap</span><span class="params">(NavigableMap&lt;K, ? extends V&gt; m)</span><span class="comment">//返回一个不可修改的NavigableMap</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; Collection&lt;T&gt; <span class="title">synchronizedCollection</span><span class="params">(Collection&lt;T&gt; c)</span></span>&#123;&#125;<span class="comment">//返回一个同步的（即线程安全的）Collection</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Set&lt;T&gt; <span class="title">synchronizedSet</span><span class="params">(Set&lt;T&gt; s)</span></span>&#123;&#125;<span class="comment">//返回一个同步的Set</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">SortedSet&lt;T&gt; <span class="title">synchronizedSortedSet</span><span class="params">(SortedSet&lt;T&gt; s)</span></span>&#123;&#125;<span class="comment">//返回一个同步的SortedSet</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">NavigableSet&lt;T&gt; <span class="title">synchronizedNavigableSet</span><span class="params">(NavigableSet&lt;T&gt; s)</span><span class="comment">//返回一个同步的NavigableSet</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; List&lt;T&gt; <span class="title">synchronizedList</span><span class="params">(List&lt;T&gt; list)</span> </span>&#123;&#125;<span class="comment">//返回一个同步List</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">Map&lt;K,V&gt; <span class="title">synchronizedMap</span><span class="params">(Map&lt;K,V&gt; m)</span></span>&#123;&#125;<span class="comment">//返回一个同步的Map</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">SortedMap&lt;K,V&gt; <span class="title">synchronizedSortedMap</span><span class="params">(SortedMap&lt;K,V&gt; m)</span> </span>&#123;&#125;<span class="comment">//返回一个同步的SortedMap</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">NavigableMap&lt;K,V&gt; <span class="title">synchronizedNavigableMap</span><span class="params">(NavigableMap&lt;K,V&gt; m)</span> </span>&#123;&#125;<span class="comment">//返回一个同步的NavigableMap</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">Collection&lt;E&gt; <span class="title">checkedCollection</span><span class="params">(Collection&lt;E&gt; c, Class&lt;E&gt; type)</span> </span>&#123;&#125;<span class="comment">//返回指定Collection的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">Queue&lt;E&gt; <span class="title">checkedQueue</span><span class="params">(Queue&lt;E&gt; queue, Class&lt;E&gt; type)</span></span>&#123;&#125;<span class="comment">//返回指定queue的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">Set&lt;E&gt; <span class="title">checkedSet</span><span class="params">(Set&lt;E&gt; s, Class&lt;E&gt; type)</span> </span>&#123;&#125;<span class="comment">//返回指定set的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">SortedSet&lt;E&gt; <span class="title">checkedSortedSet</span><span class="params">(SortedSet&lt;E&gt; s, Class&lt;E&gt; type)</span> </span>&#123;&#125;<span class="comment">//返回指定sortedSet的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">NavigableSet&lt;E&gt; <span class="title">checkedNavigableSet</span><span class="params">(NavigableSet&lt;E&gt; s, Class&lt;E&gt; type)</span> </span>&#123;&#125;<span class="comment">//返回指定NavigableSet的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">List&lt;E&gt; <span class="title">checkedList</span><span class="params">(List&lt;E&gt; list, Class&lt;E&gt; type)</span> </span>&#123;&#125;<span class="comment">//返回指定List的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K, V&gt; <span class="function">Map&lt;K, V&gt; <span class="title">checkedMap</span><span class="params">(Map&lt;K, V&gt; m, Class&lt;K&gt; keyType, Class&lt;V&gt; valueType)</span></span>&#123;&#125;<span class="comment">////返回指定Map的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">SortedMap&lt;K,V&gt; <span class="title">checkedSortedMap</span><span class="params">(SortedMap&lt;K, V&gt; m, Class&lt;K&gt; keyType,Class&lt;V&gt; valueType)</span></span>&#123;&#125;<span class="comment">//返回指定sortedMap的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">NavigableMap&lt;K,V&gt; <span class="title">checkedNavigableMap</span><span class="params">(NavigableMap&lt;K, V&gt; m,Class&lt;K&gt; keyType,Class&lt;V&gt; valueType)</span></span>&#123;&#125;<span class="comment">//返回指定NavigableMap的动态类型安全视图</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Iterator&lt;T&gt; <span class="title">emptyIterator</span><span class="params">()</span></span>&#123;&#125;<span class="comment">//返回一个空的Iterator，即hasNext()返回一直为false，next()返回抛出一个NoSuchElementException，remove()返回抛出一个IllegalStateException</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">ListIterator&lt;T&gt; <span class="title">emptyListIterator</span><span class="params">()</span></span>&#123;&#125;<span class="comment">//返回一个空的ListIterator</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Enumeration&lt;T&gt; <span class="title">emptyEnumeration</span><span class="params">()</span></span>&#123;&#125;<span class="comment">//返回一个空的枚举 enumeration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> &lt;T&gt; <span class="function">Set&lt;T&gt; <span class="title">emptySet</span><span class="params">()</span></span>&#123;&#125;<span class="comment">//返回一个空的不可变的的Set</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">SortedSet&lt;E&gt; <span class="title">emptySortedSet</span><span class="params">()</span> </span>&#123;&#125;<span class="comment">//返回一个空的不可变的的sortedSet</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">NavigableSet&lt;E&gt; <span class="title">emptyNavigableSet</span><span class="params">()</span> </span>&#123;&#125;<span class="comment">//返回一个空的不可变的的NavigableSet</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">emptyList</span><span class="params">()</span></span>&#123;&#125;<span class="comment">//返回一个空的不可变的List</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> &lt;K,V&gt; <span class="function">Map&lt;K,V&gt; <span class="title">emptyMap</span><span class="params">()</span></span>&#123;&#125;<span class="comment">//返回一个空的不可变的Map</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> &lt;K,V&gt; <span class="function">SortedMap&lt;K,V&gt; <span class="title">emptySortedMap</span><span class="params">()</span> </span>&#123;&#125;<span class="comment">//返回一个空的不可变的sortedMap</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> &lt;K,V&gt; <span class="function">NavigableMap&lt;K,V&gt; <span class="title">emptyNavigableMap</span><span class="params">()</span> </span>&#123;&#125;<span class="comment">//返回一个空的不可变的NavigableMap</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Set&lt;T&gt; <span class="title">singleton</span><span class="params">(T o)</span></span>&#123;&#125;<span class="comment">//返回一个只包含一个指定元素的不可变的Set</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">singletonList</span><span class="params">(T o)</span></span>&#123;&#125;<span class="comment">//返回一个只包含一个指定元素的不可变的List</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K,V&gt; <span class="function">Map&lt;K,V&gt; <span class="title">singletonMap</span><span class="params">(K key, V value)</span></span>&#123;&#125;<span class="comment">//返回一个只包含指定键、值的不可变的Map</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">nCopies</span><span class="params">(<span class="keyword">int</span> n, T o)</span> </span>&#123;&#125;<span class="comment">//返回一个只包含n个重复指定元素的List</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Comparator&lt;T&gt; <span class="title">reverseOrder</span><span class="params">()</span></span>&#123;&#125;<span class="comment">//返回一个比较器，该比较器的比较规则与collection元素的自然比较规则相反</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Comparator&lt;T&gt; <span class="title">reverseOrder</span><span class="params">(Comparator&lt;T&gt; cmp)</span><span class="comment">////返回一个比较器，该比较器的比较规则与指定比较器的比较规则相反</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; Enumeration&lt;T&gt; <span class="title">enumeration</span><span class="params">(<span class="keyword">final</span> Collection&lt;T&gt; c)</span> </span>&#123;&#125;<span class="comment">//返回一个指定collection集合的枚举</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">ArrayList&lt;T&gt; <span class="title">list</span><span class="params">(Enumeration&lt;T&gt; e)</span> </span>&#123;&#125;<span class="comment">//Returns an array list containing the elements returned by the specified enumeration in the order they are returned by the enumeration. </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">frequency</span><span class="params">(Collection&lt;?&gt; c, Object o)</span> </span>&#123;&#125;<span class="comment">//Returns the number of elements in the specified collection equal to the specified object.</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">disjoint</span><span class="params">(Collection&lt;?&gt; c1, Collection&lt;?&gt; c2)</span> </span>&#123;&#125;<span class="comment">//Returns &#123;@code true&#125; if the two specified collections have no elements in common.</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">boolean</span> <span class="title">addAll</span><span class="params">(Collection&lt;? <span class="keyword">super</span> T&gt; c, T... elements)</span> </span>&#123;&#125;<span class="comment">//Adds all of the specified elements to the specified collection.</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;E&gt; <span class="function">Set&lt;E&gt; <span class="title">newSetFromMap</span><span class="params">(Map&lt;E, Boolean&gt; map)</span></span>&#123;&#125;<span class="comment">//Returns a set backed by the specified map.  The resulting set displays the same ordering, concurrency, and performance characteristics as the backing map.</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Queue&lt;T&gt; <span class="title">asLifoQueue</span><span class="params">(Deque&lt;T&gt; deque)</span></span>&#123;&#125;<span class="comment">//Returns a view of a &#123;@link Deque&#125; as a Last-in-first-out (Lifo)</span></span><br></pre></td></tr></table></figure>
+
+<p>没漏的话应该是Collections工具类的所有public方法了，不行了，后面的翻译不下去了，直接复制英文注释了，还有Arrays工具类，有时间再看吧，看得脑壳儿疼</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/19/Java-Collection/" rel="prev" title="Java-Collection">
+      <i class="fa fa-chevron-left"></i> Java-Collection
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/21/Java-%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90%E4%BF%AE%E9%A5%B0%E7%AC%A6/" rel="next" title="Java访问权限修饰符">
+      Java访问权限修饰符 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Collections"><span class="nav-number">2.</span> <span class="nav-text">Collections</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">定义：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%90%E4%BE%9B%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">提供的方法：</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yanzx"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">yanzx</p>
+  <div class="site-description" itemprop="description">yanzx的blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yanzixian" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yanzixian" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yanzx73@163.com" title="E-Mail → mailto:yanzx73@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yanzx</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
